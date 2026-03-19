@@ -8,6 +8,10 @@ Three environments exist, each with its own Fastly host, Google Drive content so
 | Production | developer.adobe.com | `main--adp-devsite--adobedocs.aem.live` | adobe.io |
 | Dev | developer-dev.adobe.com | `main--adp-devsite--adobedocs.aem.page` | adobe.io |
 
+Google Drive folders:
+- `adobe.io-stage`: https://drive.google.com/drive/folders/1TNL03Z8uSfNR_bj1gW8I-yY0Q96e7dtd
+- `adobe.io`: https://drive.google.com/drive/folders/1cV6zhxBY6zrAAqA_HalWeDAH4mPloY7T
+
 ### Understanding the AEM URL Format
 
 `{branch}--{repo}--{github-org}.aem.page`
@@ -15,6 +19,26 @@ Three environments exist, each with its own Fastly host, Google Drive content so
 - The branch segment = which code branch is deployed
 - The repo segment = which GitHub repo (e.g. `adp-devsite`, `adp-devsite-stage`)
 - The org segment = GitHub org (`adobedocs`)
+
+Examples:
+- `stage--adp-devsite-stage--adobedocs.aem.page` — stage branch of adp-devsite, with stage content
+- `main--adp-devsite--adobedocs.aem.live` — main branch of adp-devsite, production content
+- `branchName--adp-devsite--adobedocs.aem.page` — feature branch code with prod content
+- `branchName--adp-devsite-stage--adobedocs.aem.page` — feature branch code with stage content
+
+### Content Source and the Authorization Header
+
+The `x-content-source-authorization: branchName` header (set by GitHub Actions) determines which content is served:
+- **With** the header → content served from that specific branch (stage Google Drive / `adobe.io-stage`)
+- **Without** the header → content served from the `adobe.io` Google Drive folder (production)
+
+This means the same AEM URL can serve different content depending on whether the GitHub Action that deployed it passed the authorization header.
+
+### How Routing Works (Deployed)
+
+In deployed environments, Fastly handles routing based on the path prefix:
+- **Dev Biz paths** (`helix_transclusion_table`) — served directly from the AEM host
+- **Dev Docs paths** (`adp_docs_table`) — routed to the runtime connector
 
 ### Deploying Content
 
@@ -37,10 +61,13 @@ Three environments exist, each with its own Fastly host, Google Drive content so
 
 ### Adding a New Path
 
-To register a new docs path prefix so the router knows to send it to the runtime connector:
+To register a new docs path prefix so the router knows where to send it:
 
-**Stage:** Edit the `devsitepaths.json` spreadsheet in `adobe.io-stage/franklin_assets/` → Sidekick preview
-**Prod/Dev:** Edit the `devsitepaths.json` spreadsheet in `adobe.io/franklin_assets/` → Sidekick preview + publish
+**Stage:** Edit the `devsitepaths.json` spreadsheet in `adobe.io-stage/franklin_assets/` → Sidekick preview (do NOT publish)
+- Spreadsheet: https://docs.google.com/spreadsheets/d/1GqZ6QJwOhSG-beyd0nIEJ_cHd5PGBTghsqhbTM9nqMs
+
+**Prod/Dev:** Edit the `devsitepaths.json` spreadsheet in `adobe.io/franklin_assets/` → Sidekick preview AND publish
+- Spreadsheet: https://docs.google.com/spreadsheets/d/1V_mVmnlREEQgCM8XA2VNXtRhoTlrFFSCF3Wh_8-4ig
 
 Fastly table names:
 - Dev Biz paths: `helix_transclusion_table`
@@ -48,7 +75,7 @@ Fastly table names:
 
 ---
 
-## Multi-Server Dev Architecture
+## Multi-Server Dev Architecture (Local)
 
 Three servers must run together to produce a local EDS (Franklin/AEM) page.
 
@@ -66,7 +93,7 @@ Three servers must run together to produce a local EDS (Franklin/AEM) page.
 - `dev-docs-reference` — reference documentation content
 - `dev-docs-template` — template used to bootstrap new EDS content repos; clone this when creating a new docs site
 
-### How a Request Flows
+### How a Request Flows (Local Dev)
 
 1. Browser hits `localhost:3000` (the router in `adp-devsite/dev.mjs`)
 2. The router fetches `devsitepaths.json` from the stage AEM instance to know which URL path prefixes belong to docs content repos vs. the main devsite
