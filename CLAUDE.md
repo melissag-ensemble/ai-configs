@@ -15,6 +15,22 @@ The devsite serves two distinct types of content, each with its own authoring wo
 - Developers author and review changes through standard GitHub workflows (branches, PRs)
 - Reference site: [developer-stage.adobe.com/dev-docs-reference](https://developer-stage.adobe.com/dev-docs-reference/) — source: [dev-docs-reference](https://github.com/AdobeDocs/dev-docs-reference/blob/main/src/pages/index.md)
 
+**Gatsby** (legacy tech stack)
+- Older Adobe developer sites use [Gatsby](https://www.gatsbyjs.com/) with the [aio-theme](https://github.com/adobe/aio-theme) component library
+- Content is also markdown-based, which is why migration to DevDocs is feasible without a full rewrite
+- DevDocs intentionally keeps block syntax similar to aio-theme so content authors don't have to change much
+- Sites being migrated from Gatsby to DevDocs should refer to the [DevDocs migration best practices](https://developer-stage.adobe.com/dev-docs-reference/getting-started/dev-docs/best-practices/)
+
+Key differences / migration notes:
+- **File naming**: EDS requires kebab-case — no underscores, periods, or uppercase in filenames (folders are more lenient)
+- **Assets**: Must be under `src/pages/`, not a `static/` folder (exception: JSON files for Redocly must be in `static/`)
+- **Trailing slashes**: Gatsby tolerates invalid trailing slashes; EDS does not — use `redirects.json` to cover old bookmarks during transition
+- **Horizontal rules**: `---`, `* * *`, and `<hr>` are not supported; replace with `<HorizontalLine />`
+- **HTML tags / custom CSS**: Not supported — escape HTML characters or use EDS block equivalents
+- **Block replacements**: Hero → Superhero, Teaser/AnnouncementBlock → Announcement, TextBlock → Cards or Columns, ListBlock → List, TabsBlock → Tab, Media → Embed, openAPISpec → RedoclyAPIBlock
+- **Links**: Use `[ ]` not `< >`; relative paths must include filename and extension (e.g. `index.md`); anchor links only work on deployed stage, not local dev
+- **Config.md**: In Gatsby, Home is optional; in EDS, Home must be the first path under Pages
+
 ---
 
 ## Environments
