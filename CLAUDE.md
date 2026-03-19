@@ -1,3 +1,24 @@
+## Content Types
+
+The devsite serves two distinct types of content, each with its own authoring workflow:
+
+**Dev Biz** (document-based authoring)
+- Content lives in Google Drive (Google Docs/Sheets), following the standard [AEM Edge Delivery Services](https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/edge-delivery/overview) model
+- Authors use the [AEM Sidekick](https://www.aem.live/docs/sidekick) browser extension to preview and publish content
+- EDS parses the documents and generates semantic HTML for delivery
+- No code required — content updates go live without rebuilds
+
+**Dev Docs** (GitHub markdown-based)
+- Content lives in GitHub repos as Markdown files under `src/pages/`
+- Not a native EDS content source — the [`devsite-runtime-connector`](https://github.com/AdobeDocs/devsite-runtime-connector) transforms the markdown into EDS-compatible HTML at request time
+- Content is deployed via GitHub Actions (not Sidekick)
+- Developers author and review changes through standard GitHub workflows (branches, PRs)
+- Reference site: [developer-stage.adobe.com/dev-docs-reference](https://developer-stage.adobe.com/dev-docs-reference/) — source: [dev-docs-reference](https://github.com/AdobeDocs/dev-docs-reference/blob/main/src/pages/index.md)
+
+At runtime, Fastly routes requests to the correct source based on path prefix: Dev Biz paths are served directly from AEM, Dev Docs paths are routed through the runtime connector.
+
+---
+
 ## Environments
 
 Three environments exist, each with its own Fastly host, Google Drive content source, and deploy process.
@@ -11,6 +32,10 @@ Three environments exist, each with its own Fastly host, Google Drive content so
 Google Drive folders:
 - `adobe.io-stage`: https://drive.google.com/drive/folders/1TNL03Z8uSfNR_bj1gW8I-yY0Q96e7dtd
 - `adobe.io`: https://drive.google.com/drive/folders/1cV6zhxBY6zrAAqA_HalWeDAH4mPloY7T
+
+Dev Biz Sidekick:
+- Library: https://main--adp-devsite--adobedocs.aem.live/tools/sidekick/library.html?plugin=blocks
+- Source (Google Drive): https://drive.google.com/drive/u/0/folders/1bzYUsqvroGP1EUCMgIQe0Mh3maKVbfUm
 
 ### Understanding the AEM URL Format
 
@@ -90,7 +115,7 @@ Three servers must run together to produce a local EDS (Franklin/AEM) page.
 
 **Content repos** (any one runs on `:3003`):
 - `adp-devsite-github-actions-test` — test/example content repo
-- `dev-docs-reference` — reference documentation content
+- `dev-docs-reference` — reference documentation content; stage site at https://developer-stage.adobe.com/dev-docs-reference/, source at https://github.com/AdobeDocs/dev-docs-reference/blob/main/src/pages/index.md
 - `dev-docs-template` — template used to bootstrap new EDS content repos; clone this when creating a new docs site
 
 ### How a Request Flows (Local Dev)
