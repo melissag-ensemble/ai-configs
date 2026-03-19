@@ -15,8 +15,6 @@ The devsite serves two distinct types of content, each with its own authoring wo
 - Developers author and review changes through standard GitHub workflows (branches, PRs)
 - Reference site: [developer-stage.adobe.com/dev-docs-reference](https://developer-stage.adobe.com/dev-docs-reference/) — source: [dev-docs-reference](https://github.com/AdobeDocs/dev-docs-reference/blob/main/src/pages/index.md)
 
-At runtime, Fastly routes requests to the correct source based on path prefix: Dev Biz paths are served directly from AEM, Dev Docs paths are routed through the runtime connector.
-
 ---
 
 ## Environments
@@ -37,7 +35,9 @@ Dev Biz Sidekick:
 - Library: https://main--adp-devsite--adobedocs.aem.live/tools/sidekick/library.html?plugin=blocks
 - Source (Google Drive): https://drive.google.com/drive/u/0/folders/1bzYUsqvroGP1EUCMgIQe0Mh3maKVbfUm
 
-### Understanding the AEM URL Format
+---
+
+## AEM URL Format
 
 `{branch}--{repo}--{github-org}.aem.page`
 
@@ -59,30 +59,13 @@ The `x-content-source-authorization: branchName` header (set by GitHub Actions) 
 
 This means the same AEM URL can serve different content depending on whether the GitHub Action that deployed it passed the authorization header.
 
-### How Routing Works (Deployed)
+---
 
-In deployed environments, Fastly handles routing based on the path prefix:
+## Routing
+
+In deployed environments, Fastly routes requests based on path prefix:
 - **Dev Biz paths** (`helix_transclusion_table`) — served directly from the AEM host
 - **Dev Docs paths** (`adp_docs_table`) — routed to the runtime connector
-
-### Deploying Content
-
-**Dev Biz content** (Google Drive / Sidekick):
-- Edit in `adobe.io-stage` → Sidekick preview → verify on developer-stage.adobe.com
-- Copy files from `adobe.io-stage` to `adobe.io` → Sidekick preview + publish → live on developer.adobe.com
-
-**Dev Docs content** (GitHub-based content repos):
-- Create a branch in the content repo, make edits
-- Use GitHub Action to deploy to stage from the branch (passes `x-content-source-authorization: branchName` header)
-- Verify on developer-stage.adobe.com → merge branch to main
-- Use GitHub Action to deploy to production from main
-
-### Editing Devsite Code (adp-devsite)
-
-- Create a branch off of `AdobeDocs/adp-devsite`
-- Push changes → available at `branchName--adp-devsite--adobedocs.aem.page` (prod content) or `branchName--adp-devsite-stage--adobedocs.aem.page` (stage content)
-- Any push to the repo immediately updates the deployed code
-- PR to `stage` branch when changes look good; `stage` is merged to `main` on production release
 
 ### Adding a New Path
 
@@ -100,7 +83,30 @@ Fastly table names:
 
 ---
 
-## Multi-Server Dev Architecture (Local)
+## Workflows
+
+### Deploying Dev Biz Content (Google Drive / Sidekick)
+
+- Edit in `adobe.io-stage` → Sidekick preview → verify on developer-stage.adobe.com
+- Copy files from `adobe.io-stage` to `adobe.io` → Sidekick preview + publish → live on developer.adobe.com
+
+### Deploying Dev Docs Content (GitHub-based content repos)
+
+- Create a branch in the content repo, make edits
+- Use GitHub Action to deploy to stage from the branch (passes `x-content-source-authorization: branchName` header)
+- Verify on developer-stage.adobe.com → merge branch to main
+- Use GitHub Action to deploy to production from main
+
+### Editing Devsite Code (adp-devsite)
+
+- Create a branch off of `AdobeDocs/adp-devsite`
+- Push changes → available at `branchName--adp-devsite--adobedocs.aem.page` (prod content) or `branchName--adp-devsite-stage--adobedocs.aem.page` (stage content)
+- Any push to the repo immediately updates the deployed code
+- PR to `stage` branch when changes look good; `stage` is merged to `main` on production release
+
+---
+
+## Local Dev Architecture
 
 Three servers must run together to produce a local EDS (Franklin/AEM) page.
 
