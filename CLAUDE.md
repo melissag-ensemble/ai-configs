@@ -1,3 +1,53 @@
+## Environments
+
+Three environments exist, each with its own Fastly host, Google Drive content source, and deploy process.
+
+| Environment | URL | Fastly Host | Google Drive |
+|---|---|---|---|
+| Stage | developer-stage.adobe.com | `stage--adp-devsite-stage--adobedocs.aem.page` | adobe.io-stage |
+| Production | developer.adobe.com | `main--adp-devsite--adobedocs.aem.live` | adobe.io |
+| Dev | developer-dev.adobe.com | `main--adp-devsite--adobedocs.aem.page` | adobe.io |
+
+### Understanding the AEM URL Format
+
+`{branch}--{repo}--{github-org}.aem.page`
+
+- The branch segment = which code branch is deployed
+- The repo segment = which GitHub repo (e.g. `adp-devsite`, `adp-devsite-stage`)
+- The org segment = GitHub org (`adobedocs`)
+
+### Deploying Content
+
+**Dev Biz content** (Google Drive / Sidekick):
+- Edit in `adobe.io-stage` → Sidekick preview → verify on developer-stage.adobe.com
+- Copy files from `adobe.io-stage` to `adobe.io` → Sidekick preview + publish → live on developer.adobe.com
+
+**Dev Docs content** (GitHub-based content repos):
+- Create a branch in the content repo, make edits
+- Use GitHub Action to deploy to stage from the branch (passes `x-content-source-authorization: branchName` header)
+- Verify on developer-stage.adobe.com → merge branch to main
+- Use GitHub Action to deploy to production from main
+
+### Editing Devsite Code (adp-devsite)
+
+- Create a branch off of `AdobeDocs/adp-devsite`
+- Push changes → available at `branchName--adp-devsite--adobedocs.aem.page` (prod content) or `branchName--adp-devsite-stage--adobedocs.aem.page` (stage content)
+- Any push to the repo immediately updates the deployed code
+- PR to `stage` branch when changes look good; `stage` is merged to `main` on production release
+
+### Adding a New Path
+
+To register a new docs path prefix so the router knows to send it to the runtime connector:
+
+**Stage:** Edit the `devsitepaths.json` spreadsheet in `adobe.io-stage/franklin_assets/` → Sidekick preview
+**Prod/Dev:** Edit the `devsitepaths.json` spreadsheet in `adobe.io/franklin_assets/` → Sidekick preview + publish
+
+Fastly table names:
+- Dev Biz paths: `helix_transclusion_table`
+- Dev Docs paths: `adp_docs_table`
+
+---
+
 ## Multi-Server Dev Architecture
 
 Three servers must run together to produce a local EDS (Franklin/AEM) page.
