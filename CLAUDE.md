@@ -106,6 +106,29 @@ Fastly table names:
 
 ---
 
+## Shared CI/CD Infrastructure
+
+Dev Docs content repos (like `dev-docs-reference`) don't define their own CI logic — they delegate to three shared repos:
+
+**[adp-devsite-workflow](https://github.com/AdobeDocs/adp-devsite-workflow)** — reusable GitHub Actions workflows (`workflow_call`)
+- Content repos reference these via `uses: AdobeDocs/adp-devsite-workflow/.github/workflows/XXX.yml@main`
+- `deploy.yml` — deploys changed (or all) files to stage/prod via AEM preview/live APIs, then busts the CDN cache
+- `validate-pr.yml` — runs markdown linting on `src/pages/**` changes on PRs; posts results to the job summary
+- `build-auto-generated-files.yml` — builds contributor lists and site metadata
+
+**[adp-devsite-scripts](https://github.com/AdobeDocs/adp-devsite-scripts)** — Node.js scripts used by the workflows at runtime
+- Checked out as a sibling repo during CI (not installed as an npm package)
+- `deploy.js` — makes AEM preview/live/cache API calls
+- `get-path-prefix.js` — reads the content repo's config to determine the URL path prefix for routing
+- `linter-bot/postLinterReport.js` — posts lint results as PR comments
+
+**[adp-devsite-utils](https://github.com/AdobeDocs/adp-devsite-utils)** — CLI tool for markdown linting and utilities
+- Invoked in CI via `npx --yes github:AdobeDocs/adp-devsite-utils runLint`
+- Custom remark lint rules in `linters/` (frontmatter checks, no HTML tags, alt text, filename conventions, etc.)
+- `bin/` utilities: build redirections, Fastly redirect management, site metadata, link normalization
+
+---
+
 ## Local Dev Architecture
 
 Three servers must run together to produce a local EDS (Franklin/AEM) page.
