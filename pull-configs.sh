@@ -23,4 +23,7 @@ else
   echo "    Symlink OK."
 fi
 
+echo "==> Codex AGENTS.md refresh"
+echo "    If CLAUDE.md changed, run: ./refresh-agents.sh"
+
 echo "Done."
