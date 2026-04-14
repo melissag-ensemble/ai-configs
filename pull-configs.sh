@@ -26,4 +26,20 @@ fi
 echo "==> Codex AGENTS.md refresh"
 echo "    If CLAUDE.md changed, run: ./refresh-agents.sh"
 
+echo ""
+echo "==> Cursor global preferences (paste into Cursor Settings → Rules for AI)"
+echo "    -----------------------------------------------------------------------"
+awk '/^## Personal Preferences$/,/^---$/' "$SCRIPT_DIR/CLAUDE.md" \
+  | grep -v "^## Personal Preferences$" \
+  | grep -v "^---$"
+echo "    -----------------------------------------------------------------------"
+if command -v pbcopy >/dev/null 2>&1; then
+  awk '/^## Personal Preferences$/,/^---$/' "$SCRIPT_DIR/CLAUDE.md" \
+    | grep -v "^## Personal Preferences$" \
+    | grep -v "^---$" \
+    | pbcopy
+  echo "    (copied to clipboard)"
+fi
+
+echo ""
 echo "Done."

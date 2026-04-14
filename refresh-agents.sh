@@ -22,6 +22,7 @@ Treat CLAUDE.md as the source of truth, but do not copy it 1:1.
 Rewrite AGENTS.md for Codex as a concise workspace-context file for repos under /Users/melissag/Projects.
 
 Keep:
+- the entire "Personal Preferences" section verbatim — do not condense or reword it
 - durable institutional knowledge
 - cross-repo mental models
 - architecture facts

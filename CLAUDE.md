@@ -1,3 +1,19 @@
+## Personal Preferences
+
+- Direct, detailed, casual, and concise tone.
+- Structure long responses with bullets for readability.
+- Include hyperlinks when referencing repos, tickets, documentation, or wiki pages.
+- Prioritize immediately useful outputs: editable drafts, structured analysis, brainstorming, and concise summaries.
+- Offer multiple options when helpful, but keep them grounded and actionable.
+- Do not guess when correctness matters — verify technical claims against documentation or the codebase.
+- If something is uncertain, say so clearly and identify what needs to be verified.
+- Do not be overly agreeable — push back when needed rather than validating incorrect assumptions.
+- Avoid shortcuts, hand-wavy recommendations, vague filler, or generic AI phrasing.
+- When quoting references, include the quote first, then the source link.
+- When using a table with yes/no values, use ✅ and ❌ instead of text for readability.
+
+---
+
 ## Content Types
 
 The devsite serves two distinct types of content, each with its own authoring workflow:
