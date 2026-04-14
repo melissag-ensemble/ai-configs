@@ -6,12 +6,11 @@ Personal AI assistant configs: `CLAUDE.md` for Claude Code, `AGENTS.md` for Code
 
 | File | Tool | Purpose |
 |---|---|---|
-| `CLAUDE.md` | Claude Code | Source of truth — personal preferences + workspace knowledge |
-| `AGENTS.md` | Codex | Codex-friendly version derived from `CLAUDE.md` |
-| `adp-devsite-cursor-rules/.cursor/rules/personal-preferences.mdc` | Cursor | Personal preferences rule (always-apply) |
+| `CLAUDE.md` | Claude Code + Cursor | Source of truth — personal preferences + workspace knowledge |
+| `AGENTS.md` | Codex + Cursor | Codex-friendly version derived from `CLAUDE.md` |
 | `adp-devsite-cursor-rules/.cursor/rules/eds-conversion.mdc` | Cursor | Gatsby-to-EDS conversion workflow rule |
 
-`CLAUDE.md` and `AGENTS.md` are scoped to `~/Projects/` so Claude Code and Codex pick them up across all child repos automatically.
+`CLAUDE.md` and `AGENTS.md` are scoped to `~/Projects/` so Claude Code and Codex pick them up across all child repos automatically. Cursor also auto-imports them via the "Include third-party Plugins, Skills, and other configs" setting.
 
 ## Setup
 
@@ -36,14 +35,10 @@ Both `CLAUDE.md` and `AGENTS.md` include a **Personal Preferences** section at t
 
 The Cursor equivalent lives in `adp-devsite-cursor-rules/.cursor/rules/personal-preferences.mdc` with `alwaysApply: true`.
 
-> **Cursor caveat:** Cursor only reads `.cursor/rules/` from the workspace root — not parent directories. So `personal-preferences.mdc` applies when `~/Projects/` is your workspace root, but not when individual repos (e.g. `adp-devsite`) are opened directly. For global coverage, also paste the preferences into **Cursor Settings → Rules for AI**. Run `./pull-configs.sh` to print the text ready to copy.
-
 **To update preferences:**
 1. Edit the `Personal Preferences` section in `CLAUDE.md` — this is the source of truth
 2. Update the same section in `AGENTS.md` to match (or run `./refresh-agents.sh` and paste the Codex prompt)
-3. Update `adp-devsite-cursor-rules/.cursor/rules/personal-preferences.mdc` to match
-4. Run `./pull-configs.sh` and paste the printed preferences into **Cursor Settings → Rules for AI**
-5. Commit both repos
+3. Commit
 
 ## Usage
 
