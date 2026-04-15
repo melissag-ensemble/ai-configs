@@ -26,7 +26,7 @@ The devsite serves two distinct types of content, each with its own authoring wo
 
 **Dev Docs** (GitHub markdown-based)
 - Content lives in GitHub repos as Markdown files under `src/pages/`
-- Not a native EDS content source — the [`devsite-runtime-connector`](https://github.com/AdobeDocs/devsite-runtime-connector) transforms the markdown into EDS-compatible HTML at request time
+- Not a native EDS content source — the [`devsite-runtime-connector`](https://github.com/aemsites/devsite-runtime-connector) transforms the markdown into EDS-compatible HTML at request time
 - Content is deployed via GitHub Actions (not Sidekick)
 - Developers author and review changes through standard GitHub workflows (branches, PRs)
 - Reference site: [developer-stage.adobe.com/dev-docs-reference](https://developer-stage.adobe.com/dev-docs-reference/) — source: [dev-docs-reference](https://github.com/AdobeDocs/dev-docs-reference/blob/main/src/pages/index.md)
