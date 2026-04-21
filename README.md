@@ -9,6 +9,7 @@ Personal AI assistant configs: `CLAUDE.md` for Claude Code, `AGENTS.md` for Code
 | `CLAUDE.md` | Claude Code + Cursor | Source of truth — personal preferences + workspace knowledge |
 | `AGENTS.md` | Codex + Cursor | Codex-friendly version derived from `CLAUDE.md` |
 | `adp-devsite-cursor-rules/.cursor/rules/eds-conversion.mdc` | Cursor | Gatsby-to-EDS conversion workflow rule |
+| `sync-claude-mcp.sh` | Claude Desktop → Claude Code | Syncs MCP servers from Desktop config to `~/.claude.json` |
 
 `CLAUDE.md` and `AGENTS.md` are scoped to `~/Projects/` so Claude Code and Codex pick them up across all child repos automatically. Cursor also auto-imports them via the "Include third-party Plugins, Skills, and other configs" setting.
 
@@ -62,3 +63,25 @@ Prints a ready-to-paste Codex prompt and copies it to your clipboard. The prompt
 2. `./pull-configs.sh` — pull `ai-configs` and cursor rules, verify symlink
 3. If `CLAUDE.md` changed: `./refresh-agents.sh` → paste into Codex → review diff → commit
 4. If personal preferences changed: manually update `AGENTS.md` and `personal-preferences.mdc` to match
+
+### MCP server sync (Claude Desktop ↔ Claude Code)
+
+`sync-claude-mcp.sh` merges `mcpServers` from Claude Desktop's config into `~/.claude.json` so both tools stay in sync automatically.
+
+**How it works:** A launchd agent (`com.melissag.sync-claude-mcp`) watches the Desktop config file and runs the script whenever it changes. It also runs once at login.
+
+**First-time setup** (one-time, already done on this machine):
+```bash
+launchctl load ~/Library/LaunchAgents/com.melissag.sync-claude-mcp.plist
+```
+
+**On a new machine:**
+```bash
+cp ~/Projects/sync-claude-mcp.sh ~/Projects/  # already in repo
+# Create the plist at ~/Library/LaunchAgents/com.melissag.sync-claude-mcp.plist (see file in repo)
+launchctl load ~/Library/LaunchAgents/com.melissag.sync-claude-mcp.plist
+```
+
+**Logs:** `~/Library/Logs/sync-claude-mcp.log`
+
+**Manual run:** `./sync-claude-mcp.sh`
