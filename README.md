@@ -15,9 +15,10 @@ Personal AI assistant configs shared across every repo under `~/Projects/`:
 | `AGENTS.md` | Codex + Cursor | Codex-friendly version derived from `CLAUDE.md` |
 | `adp-devsite-cursor-rules/.cursor/rules/eds-conversion.mdc` | Cursor | Gatsby-to-EDS conversion workflow rule |
 | `adp-devsite-cursor-rules/.claude/commands/devsite-release.md` | Claude Code | `/devsite-release` slash command — builds the `adp-devsite` Release PR description and logs release notes to `dev-docs-reference` |
-| `pull-configs.sh` | — | Pulls latest configs + cursor rules and ensures the `.cursor` and `.claude/commands` symlinks exist |
+| `pull-configs.sh` | — | macOS/Linux. Pulls latest configs + cursor rules and ensures the `.cursor` and `.claude/commands` symlinks exist |
+| `pull-configs.ps1` | — | Windows. Same as `pull-configs.sh`, but uses hardlinks/junctions instead of symlinks (see [Windows setup](#windows)) |
 | `refresh-agents.sh` | Codex | Prints/copies a Codex prompt to regenerate `AGENTS.md` from `CLAUDE.md` |
-| `sync-claude-mcp.sh` | Claude Desktop → Claude Code | Syncs MCP servers from Desktop config to `~/.claude.json` |
+| `sync-claude-mcp.sh` | Claude Desktop → Claude Code | macOS only. Syncs MCP servers from Desktop config to `~/.claude.json` |
 
 `CLAUDE.md` and `AGENTS.md` are scoped to `~/Projects/` so Claude Code and Codex pick them up across all child repos automatically. Cursor also auto-imports them via the "Include third-party Plugins, Skills, and other configs" setting.
 
@@ -40,6 +41,41 @@ git clone https://github.com/AdobeDocs/adp-devsite-cursor-rules
 
 Then run `./pull-configs.sh` to create/verify the `.cursor` and `.claude/commands` symlinks.
 
+### Windows
+
+Windows can't create real symlinks without admin rights or Developer Mode enabled, so the Windows setup uses this repo cloned as a **subfolder** of `~/Projects` (rather than living directly at the root) plus hardlinks/junctions to project the right files up to `~/Projects`:
+
+```
+~/Projects/
+  ai-configs/                    <- this repo, cloned as a subfolder
+  adp-devsite-cursor-rules/      <- sibling repo, cloned alongside it
+  CLAUDE.md                      <- hardlink -> ai-configs/CLAUDE.md
+  AGENTS.md                      <- hardlink -> ai-configs/AGENTS.md
+  .cursor                        <- junction -> adp-devsite-cursor-rules/.cursor
+  .claude/commands               <- junction -> adp-devsite-cursor-rules/.claude/commands
+```
+
+Hardlinks (files) and junctions (directories) don't require elevation or Developer Mode, unlike `mklink`'s `/D` symlink mode.
+
+**Caveat vs. macOS symlinks:** a hardlink is two directory entries sharing the same on-disk data, not a path reference. `git pull`/`git checkout` unlink-and-recreate a changed file rather than editing it in place, which silently severs a hardlink — the two paths end up on different NTFS File IDs with no error. Directory junctions aren't affected (git only rewrites files inside a directory, not the directory entry itself), so `.cursor` and `.claude/commands` stay valid across pulls; only the `CLAUDE.md`/`AGENTS.md` hardlinks are at risk. `pull-configs.ps1` handles this by comparing NTFS File IDs on every run and relinking whenever they drift, rather than only creating the link if the path is missing.
+
+One-time setup:
+
+```powershell
+cd ~/Projects
+git clone https://github.com/melissag-ensemble/ai-configs.git
+git clone https://github.com/AdobeDocs/adp-devsite-cursor-rules.git
+
+$Root = "$HOME\Projects"
+cmd /c mklink /H "$Root\CLAUDE.md" "$Root\ai-configs\CLAUDE.md"
+cmd /c mklink /H "$Root\AGENTS.md" "$Root\ai-configs\AGENTS.md"
+cmd /c mklink /J "$Root\.cursor" "$Root\adp-devsite-cursor-rules\.cursor"
+New-Item -ItemType Directory -Force -Path "$Root\.claude" | Out-Null
+cmd /c mklink /J "$Root\.claude\commands" "$Root\adp-devsite-cursor-rules\.claude\commands"
+```
+
+After that, use `./pull-configs.ps1` (instead of `pull-configs.sh`) to pull both repos and re-verify the links.
+
 ## Claude Code slash commands
 
 Slash commands live in `adp-devsite-cursor-rules/.claude/commands/` and are exposed at `~/Projects/.claude/commands/` via the symlink, so they're available in any repo opened under `~/Projects/`.
@@ -60,10 +96,11 @@ Both `CLAUDE.md` and `AGENTS.md` include a **Personal Preferences** section at t
 ## Usage
 
 ```bash
-./pull-configs.sh
+./pull-configs.sh       # macOS/Linux
+./pull-configs.ps1      # Windows
 ```
 
-Pulls the latest `ai-configs` and cursor rules, and ensures the `.cursor` and `.claude/commands` symlinks are set up.
+Pulls the latest `ai-configs` and cursor rules, and ensures the `.cursor` and `.claude/commands` links are set up.
 
 If `CLAUDE.md` changed and you want to refresh the Codex version:
 
@@ -76,11 +113,13 @@ Prints a ready-to-paste Codex prompt and copies it to your clipboard. The prompt
 ## Sync
 
 1. `cd ~/Projects`
-2. `./pull-configs.sh` — pull `ai-configs` and cursor rules, verify the `.cursor` and `.claude/commands` symlinks
+2. `./pull-configs.sh` (macOS/Linux) or `./pull-configs.ps1` (Windows) — pull `ai-configs` and cursor rules, verify the `.cursor` and `.claude/commands` links
 3. If `CLAUDE.md` changed: `./refresh-agents.sh` → paste into Codex → review diff → commit
 4. If personal preferences changed: manually update the `Personal Preferences` section in `AGENTS.md` to match `CLAUDE.md`
 
 ### MCP server sync (Claude Desktop ↔ Claude Code)
+
+macOS only — there's no Windows equivalent. It syncs MCP servers configured in the separate Claude Desktop app into `~/.claude.json`. If you only use Claude Code (CLI or the VS Code extension) on Windows, this doesn't apply: add MCP servers directly via `claude mcp add` or by editing `~/.claude.json`.
 
 `sync-claude-mcp.sh` merges `mcpServers` from Claude Desktop's config into `~/.claude.json` so both tools stay in sync automatically.
 

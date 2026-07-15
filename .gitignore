@@ -3,6 +3,7 @@
 !AGENTS.md
 !.gitignore
 !pull-configs.sh
+!pull-configs.ps1
 !refresh-agents.sh
 !sync-claude-mcp.sh
 !README.md
